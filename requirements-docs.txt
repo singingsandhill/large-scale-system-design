@@ -1,0 +1,10 @@
+# 문서 사이트(MkDocs) 빌드 전용 의존성.
+# mkdocs, pymdown-extensions, pygments 등은 mkdocs-material 이 함께 끌고 오므로 적지 않는다.
+#
+# ~=9.7 은 ">=9.7, <10" 을 뜻한다. patch/minor 는 자동으로 따라가되
+# 호환성이 깨지는 major 업그레이드는 사람이 이 파일을 고쳐야만 일어난다.
+#
+# ⚠️ Material for MkDocs 는 2026-11-05 EOL 예정이다(유지보수 모드, 중대 버그·보안만 수정).
+#    후속 프로젝트는 같은 팀의 Zensical. 배경과 재검토 시점은
+#    docs/architecture/adr/0001-documentation-stack.md 참고.
+mkdocs-material~=9.7

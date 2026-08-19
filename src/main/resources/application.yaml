@@ -1,0 +1,41 @@
+spring:
+  application:
+    name: scholar
+
+  # 로컬 전용 오버라이드를 저장소 루트의 .env 에서 읽는다.
+  #  - optional: → .env 가 없어도 정상 기동 (.env 는 gitignore 대상, .env.example 참고)
+  #  - [.properties] → 확장자 힌트. '.env' 는 어떤 PropertySourceLoader 도 모르는 확장자라
+  #    이 힌트가 없으면 optional 이라서 "예외 없이 조용히 무시"된다. 반드시 유지할 것.
+  #  - 우선순위: application.yaml < .env < 실제 OS 환경변수 < -D 시스템 프로퍼티 < CLI 인자
+  #  - .env 는 ./gradlew test 에도 적용된다(Test task 의 작업 디렉터리 = 프로젝트 루트).
+  #    테스트 결과를 바꾸는 값은 .env 에 두지 말 것.
+  config:
+    import: "optional:file:.env[.properties]"
+
+  jpa:
+    # 기동 시 "spring.jpa.open-in-view is enabled by default" WARN 을 없애고,
+    # 뷰 렌더링 중 DB 쿼리가 나가는 것을 막는다.
+    open-in-view: false
+    # spring.jpa.hibernate.ddl-auto 는 의도적으로 설정하지 않는다.
+    # Boot 기본값이 임베디드 H2 면 create-drop, 실제 DB 면 none 이라 그대로가 맞다.
+
+  h2:
+    console:
+      # spring-boot-h2console 의존성은 있지만 devtools 가 없어 콘솔은 기본 OFF 다.
+      # (/h2-console 404 의 원인) 로컬에서 쓰려면 .env 에 H2_CONSOLE=true.
+      # 배포 환경에서는 절대 켜지 말 것 — CSRF 보호가 없고 인증도 걸려 있지 않다.
+      # 접속 시 JDBC URL 은 기동 로그에 찍힌 jdbc:h2:mem:<uuid> 를 그대로 복사해야 한다.
+      enabled: "${H2_CONSOLE:false}"
+
+server:
+  # 환경에 따라 바꿀 값은 모두 이 패턴을 따른다: ${ENV_VAR:default}
+  port: "${SERVER_PORT:8080}"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        # Boot 4.1 기본값도 health 뿐이지만, 명시해 두면 나중에 범위를 넓히는 변경이
+        # diff 에 드러난다. Spring Security 가 없으므로 여기에 추가하는 모든 엔드포인트는
+        # 인증 없이 공개된다. (/actuator/modulith 를 보려면 "health,modulith")
+        include: "health"

@@ -1,16 +1,20 @@
-# Compiled class file
+# =============================================================
+# large-scale-system-design (scholar)
+#
+# 규칙 1: 마지막에 매칭된 패턴이 이긴다. '!' 부정은 항상 무시 패턴 "뒤"에 온다.
+# 규칙 2: 디렉터리를 통째로 제외하면(dir/) 그 안의 파일은 '!'로 되살릴 수 없다.
+#         일부만 되살리려면 dir/ 대신 dir/* 로 써야 한다.
+# =============================================================
+
+### Java ###
 *.class
-
-# Log file
-*.log
-
-# BlueJ files
 *.ctxt
-
-# Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
-# Package Files #
+# 실험 로그를 커밋하고 싶다면 이 줄 "다음"에 !docs/**/*.log 를 추가할 것 (순서 중요)
+*.log
+
+### Package Files ###
 *.jar
 *.war
 *.nar
@@ -19,6 +23,76 @@
 *.tar.gz
 *.rar
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+# ⚠️ 위 '*.jar' 는 Gradle Wrapper 까지 무시한다.
+#    'gradle/' 디렉터리 자체는 무시되지 않으므로 파일 단위 부정이 정상 동작한다.
+#    이 줄을 지우면 clone 한 사람과 CI 에서
+#    "Could not find or load main class org.gradle.wrapper.GradleWrapperMain" 으로 죽는다.
+!gradle/wrapper/gradle-wrapper.jar
+
+# JVM crash logs
 hs_err_pid*
 replay_pid*
+
+### Gradle ###
+.gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### IntelliJ IDEA ###
+# 주의: '.idea/' 는 디렉터리 제외라 '!.idea/codeStyles/' 로 일부만 되살릴 수 없다.
+#       공유가 필요해지면 '.idea/*' + '!.idea/codeStyles' 형태로 바꿀 것.
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# ⚠️ 'out/' 은 어느 깊이에서든 매칭된다.
+#    adapter/out 같은 패키지가 통째로 사라지지 않도록 아래 부정이 반드시 필요하다.
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+### Eclipse / STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings/
+.springBeans
+.sts4-cache
+
+### VS Code ###
+.vscode/
+
+### 로컬 환경변수 ###
+# '.env' 는 파일과 디렉터리를 모두 매칭한다 (python -m venv .env 도 함께 커버).
+# '!.env.example' 는 반드시 '.env.*' "뒤"에 와야 한다. 앞에 두면 무효화된다.
+.env
+.env.*
+!.env.example
+
+### Claude Code ###
+# CLAUDE.md(공유 지침)는 커밋하고, .claude/(개인 로컬 설정)만 무시한다.
+# '.claude/' 는 선행 '.' + 후행 '/' 덕분에 대소문자 무시 파일시스템(WSL/NTFS)에서도
+# 'CLAUDE.md' 를 매칭하지 않는다. 'claude*' 같은 wildcard 는 절대 쓰지 말 것.
+.claude/
+
+### MkDocs ###
+# 루트 고정(/) — 'site/' 로 쓰면 하위 디렉터리까지 매칭될 수 있다.
+# mkdocs.yml 의 site_dir 을 바꾸면 이 줄도 함께 바꿀 것.
+/site/
+
+### Python (로컬에서 문서를 빌드할 때) ###
+# 'env/' 는 넣지 않는다 — src/main/resources/env/ 까지 무시될 수 있다.
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+
+### OS ###
+.DS_Store
+._*
+Thumbs.db
+ehthumbs.db
+Desktop.ini
