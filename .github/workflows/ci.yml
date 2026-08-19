@@ -1,0 +1,93 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# 필요한 것만. checkout + setup-gradle + ./gradlew test 는 이 이상 필요 없다.
+permissions:
+  contents: read
+
+# PR 에 새 커밋이 밀려오면 이전 실행을 취소한다.
+# main 실행은 취소하지 않는다 — Gradle 캐시를 쓰는 쪽이 main 실행뿐이다.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+# 주의: 이 워크플로에는 paths 필터를 두지 않는다.
+# paths 필터로 건너뛴 워크플로의 체크는 Pending 상태로 남아, 필수 체크로 지정했을 때
+# PR 이 영원히 머지되지 않는다.
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+          # cache: gradle 을 쓰지 않는다 — 아래 setup-gradle 의 캐시와 충돌한다.
+          # 그리고 settings.gradle 에 foojay-resolver 가 없어 Gradle 이 toolchain 을
+          # 자동 다운로드할 수 없다. build.gradle 의 JavaLanguageVersion.of(21) 을
+          # 만족시키는 것이 바로 이 단계다. 버전을 함부로 올리지 말 것.
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          # MIT 라이선스 캐시 구현. 기본값(enhanced)은 Gradle 사의 독점 컴포넌트를 사용하며
+          # 사용 시 https://gradle.com/legal/terms-of-use/ 동의로 간주된다.
+          # basic 은 restore key 가 없어 빌드 파일이 바뀌면 캐시가 비지만,
+          # 이 규모에서는 체감 차이가 없다.
+          cache-provider: basic
+          # v4 부터 기본 true. gradle/actions/wrapper-validation 을 대체한다.
+          validate-wrappers: true
+
+      - name: Ensure gradlew is executable
+        # Windows 에서 커밋하면 실행 권한 비트가 100644 로 들어올 수 있다.
+        # 그 경우 아래 단계가 "Permission denied" 로 죽는 것을 막는다.
+        run: chmod +x ./gradlew
+
+      - name: Run tests
+        # --no-daemon 을 쓰지 않는다. Gradle 이 CI 에서도 daemon 사용을 권장하고,
+        # setup-gradle 이 post step 에서 daemon 을 정리한다.
+        run: ./gradlew test
+
+      - name: Upload test reports
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-reports
+          path: |
+            build/reports/tests/test
+            build/test-results/test
+          retention-days: 7
+          if-no-files-found: ignore
+
+  docs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+          cache: pip
+          cache-dependency-path: requirements-docs.txt
+
+      - name: Install docs dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-docs.txt
+
+      - name: Build docs (strict)
+        # --strict 는 MkDocs 경고 하나에도 실패한다.
+        # (nav 에 적었는데 없는 파일, 깨진 상대 링크, 없는 #앵커 등)
+        run: mkdocs build --strict

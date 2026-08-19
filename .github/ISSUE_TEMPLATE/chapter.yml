@@ -1,0 +1,123 @@
+name: "📘 Chapter"
+description: "책의 한 장을 시작합니다 — 요구사항 정리부터 설계 방어까지."
+title: "[Ch] "
+labels: ["chapter", "documentation"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        지금 전부 채우지 않아도 됩니다. 진행하면서 이 이슈를 수정해 주세요.
+        문서 산출물은 `docs/chapters/<chapter>-<topic>/` 아래에 둡니다.
+
+  - type: input
+    id: chapter-number
+    attributes:
+      label: 장 번호
+      placeholder: "6"
+    validations:
+      required: true
+
+  - type: input
+    id: chapter-title
+    attributes:
+      label: 장 제목
+      placeholder: "키-값 저장소 설계"
+    validations:
+      required: true
+
+  - type: textarea
+    id: goal
+    attributes:
+      label: 학습 목표
+      description: 이 장을 끝냈을 때 말로 설명할 수 있어야 하는 것 2~3가지.
+      placeholder: |
+        - 안정 해시가 어떤 문제를 푸는지 설명할 수 있다
+        - 정족수 W/R/N 선택의 트레이드오프를 말할 수 있다
+    validations:
+      required: true
+
+  - type: textarea
+    id: functional-requirements
+    attributes:
+      label: 기능 요구사항
+      placeholder: |
+        - put(key, value)
+        - get(key)
+    validations:
+      required: true
+
+  - type: textarea
+    id: non-functional-requirements
+    attributes:
+      label: 비기능 요구사항
+      description: 가용성 · 지연시간(p50/p99) · 일관성 모델 · 내구성 · 확장성.
+      placeholder: |
+        - 가용성 99.9%
+        - 읽기 p99 < 100ms
+        - 최종 일관성 허용
+    validations:
+      required: true
+
+  - type: textarea
+    id: capacity
+    attributes:
+      label: 용량 산정 가정
+      description: 결과 숫자만 적지 말고 계산 과정을 남겨주세요.
+      placeholder: |
+        DAU:
+        평균 QPS:
+        최대 QPS:
+        저장 용량(5년):
+        대역폭:
+    validations:
+      required: true
+
+  - type: dropdown
+    id: topics
+    attributes:
+      label: 관련 주제
+      description: 여러 개 선택할 수 있습니다.
+      multiple: true
+      options:
+        - 규모 확장
+        - 로드 밸런싱
+        - 캐시
+        - 데이터 저장소 · 샤딩
+        - 일관성 · 합의
+        - 큐 · 비동기 처리
+        - 검색 · 인덱싱
+        - 관측성 · 운영
+
+  - type: textarea
+    id: experiments
+    attributes:
+      label: 계획한 실험
+      description: 실제로 돌려 볼 것. 구체화되면 🧪 Experiment 이슈로 분리해 주세요.
+      placeholder: |
+        - 가상 노드 수를 바꿔가며 키 재배치 비율 측정
+
+  - type: input
+    id: owner
+    attributes:
+      label: 담당자 · 발표자
+      placeholder: "@github-handle"
+
+  - type: input
+    id: target-date
+    attributes:
+      label: 목표 일자
+      placeholder: "2026-09-05"
+
+  - type: checkboxes
+    id: deliverables
+    attributes:
+      label: 산출물
+      description: 진행하면서 체크해 주세요.
+      options:
+        - label: "design.md — 요구사항 · 용량 산정 · 아키텍처 · 트레이드오프"
+        - label: "구현 — 최소 프로토타입 + 테스트 통과"
+        - label: "implementation.md — 설계와 구현의 연결, 타협한 부분"
+        - label: "experiment.md — 가설 · 측정값 · 결론"
+        - label: "defense.md — 발표 질문과 답변 (답하지 못한 것 포함)"
+        - label: "notes/<member>.md — 개인 정리"
+        - label: "구조가 바뀌었다면 architecture/current.md · evolution.md 갱신"
